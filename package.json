@@ -4,8 +4,7 @@
   "description": "Video Chat App build using Nodejs, Socket IO",
   "main": "index.js",
   "scripts": {
-    "build:client": "cd ./client && npm install && npm run build",
-    "start": "npm run build:client && node index.js",
+    "start": "node index.js",
     "start:dev": "nodemon index.js"
   },
   "repository": {
