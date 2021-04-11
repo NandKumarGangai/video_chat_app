@@ -14,25 +14,52 @@ const ContextProvider = ({ children }) => {
     const [callAccepted, setCallAccepted] = useState(false);
     const [name, setName] = useState('');
     const [callEnded, setCallEnded] = useState(false);
+    const [ onlineUsers, setOnlineUsers ] = useState([]);
 
     const myVideo = useRef();
     const userVideo = useRef();
     const connectionRef = useRef();
 
-    useEffect(() => {
+    // socket.on('me', (id) => {
+    //     console.log('client socket called outside: ', id);
+    //     setMe(id);
+    // });
+
+    // socket.on('allUsers', ({ onlineUsers }) => console.log('onlineUsers: ', onlineUsers))
+
+    // useEffect(() => {
+    //     socket.emit('join', { name, id: me }, () => {});
+
+    //     socket.on('me', id => setMe(id));
+
+    //     socket.on('callUser', ({ from, name: callerName, signal }) => {
+    //         setCall({ isReceivingCall: true, from, name: callerName, signal });
+    //     });
+    // }, []);
+
+    const initiateWebcamAndMicrophone = () => {
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
             .then(currentStream => {
                 setStream(currentStream);
 
                 myVideo.current.srcObject = currentStream;
-            });
+            })
+            .catch(err => console.trace('Webcam error: ', err));
 
-        socket.on('me', id => setMe(id));
+        socket.emit('join', { name }, () => { });
+
+        socket.on('me', (id) => {
+            console.log('client socket called inside: ', id);
+            setMe(id);
+        });
+
+        socket.on('broadcast', (data) => console.log(data, 'broadcast'));
+        socket.on('allUsers', ({ onlineUsers }) => setOnlineUsers(onlineUsers));
 
         socket.on('callUser', ({ from, name: callerName, signal }) => {
             setCall({ isReceivingCall: true, from, name: callerName, signal });
         });
-    }, []);
+    };
 
     const callUser = id => {
         const peer = new Peer({
@@ -107,6 +134,8 @@ const ContextProvider = ({ children }) => {
             callUser,
             leaveCall,
             answerCall,
+            initiateWebcamAndMicrophone,
+            onlineUsers
         }}>
             { children}
         </SocketContext.Provider>

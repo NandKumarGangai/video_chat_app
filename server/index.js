@@ -1,6 +1,8 @@
 const app = require('express')();
 const cors = require('cors');
 
+const USERS = require('./users');
+
 const server = require('http').createServer(app);
 const IO = require('socket.io')(server, {
     cors: {
@@ -13,11 +15,22 @@ app.use(cors());
 
 IO.on('connection', (socket) => {
     // When user joins from front end side
-    socket.emit('me', socket.id);
+    // socket.emit('me', socket.id);
 
-    socket.on("disconnect", () => {
-		socket.broadcast.emit("callEnded")
-	});
+    socket.on('join', ({ name }) => {
+        socket.emit('me', socket.id);
+        USERS.push({ name, id: socket.id });
+
+        IO.sockets.emit('allUsers', { onlineUsers: USERS });
+    });
+
+    socket.on("disconnect", (data) => {
+        console.log('dis: ', data);
+        socket.broadcast.emit("callEnded");
+
+        USERS.splice(USERS.findIndex(({ id }) => id === socket.id), 1);
+        IO.sockets.emit('allUsers', { onlineUsers: USERS });
+    });
 
     socket.on('callUser', ({ userToCall, signalData, from, name }) => {
         IO.to(userToCall).emit('callUser', { signal: signalData, from, name })

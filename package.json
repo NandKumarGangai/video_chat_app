@@ -2,10 +2,10 @@
   "name": "video_chat_app",
   "version": "1.0.0",
   "description": "Video Chat App build using Nodejs, Socket IO",
-  "main": "index.js",
+  "main": "server/index.js",
   "scripts": {
-    "start": "node index.js",
-    "start:dev": "nodemon index.js"
+    "start": "node server/index.js",
+    "start:dev": "nodemon server/index.js"
   },
   "repository": {
     "type": "git",
