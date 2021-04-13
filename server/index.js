@@ -26,7 +26,7 @@ IO.on('connection', (socket) => {
 
     socket.on("disconnect", (data) => {
         console.log('dis: ', data);
-        socket.broadcast.emit("callEnded");
+        // socket.broadcast.emit("callEnded");
 
         USERS.splice(USERS.findIndex(({ id }) => id === socket.id), 1);
         IO.sockets.emit('allUsers', { onlineUsers: USERS });
@@ -38,6 +38,12 @@ IO.on('connection', (socket) => {
 
     socket.on('answerCall', data => {
         IO.to(data.to).emit('callAccepted', data.signal);
+    });
+
+    socket.on('endCall', data => {
+        console.log('callEnded');
+
+        socket.broadcast.emit("callEnded");
     });
 });
 

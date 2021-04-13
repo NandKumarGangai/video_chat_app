@@ -5,7 +5,6 @@ import AppBar from '@material-ui/core/AppBar';
 import Typography from '@material-ui/core/Typography';
 
 import VideoPlayer from './VideoPlayer';
-import Sidebar from './SideBar';
 import Notifications from './Notifications';
 import OnlineUsers from './OnlineUsers';
 

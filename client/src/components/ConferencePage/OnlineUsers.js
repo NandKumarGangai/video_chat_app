@@ -5,6 +5,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import VideoCallIcon from '@material-ui/icons/VideoCall';
+import PhoneDisabled from '@material-ui/icons/PhoneDisabled';
 
 import { SocketContext } from '../../Context';
 
@@ -28,7 +29,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const OnlineUsers = () => {
-    const { onlineUsers, name, callUser, me } = useContext(SocketContext); // eslint-disable-line
+    const { onlineUsers, callAccepted, callEnded, leaveCall, callUser, me } = useContext(SocketContext); // eslint-disable-line
     const classes = useStyles();
     console.log('online: ', onlineUsers)
     return (
@@ -38,7 +39,7 @@ const OnlineUsers = () => {
                     {'Online users: '}
                 </Typography>
                 {
-                    !(onlineUsers.length === 1 && onlineUsers[0].id === me) ?
+                    !(onlineUsers.length === 1 && onlineUsers[0].id === me) || onlineUsers.length === 0 ?
                         (<List dense>
                             {onlineUsers.map((user) => {
                                 const { id, name: userName } = user;
@@ -61,6 +62,19 @@ const OnlineUsers = () => {
                                                     >
                                                         {'Call'}
                                                     </Button>
+                                                </div>
+                                                <div>
+                                                    {
+                                                    (callAccepted && !callEnded) && (
+                                                        <Button
+                                                        variant="contained"
+                                                        color="secondary"
+                                                        startIcon={<PhoneDisabled fontSize="large" />}
+                                                        onClick={leaveCall} className={classes.margin}>
+                                                            {'Hang Up'}
+                                                        </Button>
+                                                    )
+                            }
                                                 </div>
                                             </div>
                                         </ListItemText>

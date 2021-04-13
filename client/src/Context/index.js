@@ -1,11 +1,11 @@
-import React, { createContext, useState, useRef, useEffect } from 'react';
+import React, { createContext, useState, useRef } from 'react';
 import { io } from 'socket.io-client';
 import Peer from 'simple-peer';
 
 export const SocketContext = createContext();
 
-// const socket = io('http://localhost:5000');
-const socket = io('https://video-chat-app-ng.herokuapp.com/');
+const socket = io('http://localhost:5000');
+// const socket = io('https://video-chat-app-ng.herokuapp.com/');
 
 const ContextProvider = ({ children }) => {
     const [stream, setStream] = useState(null);
@@ -14,28 +14,21 @@ const ContextProvider = ({ children }) => {
     const [callAccepted, setCallAccepted] = useState(false);
     const [name, setName] = useState('');
     const [callEnded, setCallEnded] = useState(false);
-    const [ onlineUsers, setOnlineUsers ] = useState([]);
+    const [onlineUsers, setOnlineUsers] = useState([]);
+    const [userStream, setUserStream] = useState(null);
 
     const myVideo = useRef();
     const userVideo = useRef();
     const connectionRef = useRef();
 
-    // socket.on('me', (id) => {
-    //     console.log('client socket called outside: ', id);
-    //     setMe(id);
-    // });
+    const leaveCallAction = () => {
+        setCallEnded(true);
 
-    // socket.on('allUsers', ({ onlineUsers }) => console.log('onlineUsers: ', onlineUsers))
-
-    // useEffect(() => {
-    //     socket.emit('join', { name, id: me }, () => {});
-
-    //     socket.on('me', id => setMe(id));
-
-    //     socket.on('callUser', ({ from, name: callerName, signal }) => {
-    //         setCall({ isReceivingCall: true, from, name: callerName, signal });
-    //     });
-    // }, []);
+        if (connectionRef.current) {
+            connectionRef.current.destroy();
+        }
+        window.location.reload();
+    };
 
     const initiateWebcamAndMicrophone = () => {
         navigator.mediaDevices.getUserMedia({ video: true, audio: true })
@@ -55,6 +48,8 @@ const ContextProvider = ({ children }) => {
 
         socket.on('broadcast', (data) => console.log(data, 'broadcast'));
         socket.on('allUsers', ({ onlineUsers }) => setOnlineUsers(onlineUsers));
+
+        socket.on('callEnded', () => { console.log('call End called'); leaveCallAction()});
 
         socket.on('callUser', ({ from, name: callerName, signal }) => {
             setCall({ isReceivingCall: true, from, name: callerName, signal });
@@ -78,8 +73,13 @@ const ContextProvider = ({ children }) => {
         });
 
         peer.on('stream', currentStream => {
-            userVideo.current.srcObject = currentStream;
+            setUserStream(currentStream);
+            if (userVideo.current) {
+                userVideo.current.srcObject = currentStream;
+            }
         });
+
+        peer.on('disconnected', () => { console.log('Called user disconnected') });
 
         socket.on('callAccepted', (signal) => {
             setCallAccepted(true);
@@ -104,20 +104,21 @@ const ContextProvider = ({ children }) => {
         });
 
         peer.on('stream', (stream) => {
+            setUserStream(stream);
             userVideo.current.srcObject = stream;
         });
+
+        peer.on('disconnected', () => { console.log('Answered user disconnected') });
 
         peer.signal(call.signal);
 
         connectionRef.current = peer;
     };
-
+    
     const leaveCall = () => {
-        setCallEnded(true);
+        socket.emit('endCall', () => {});
 
-        connectionRef.current.destroy();
-
-        window.location.reload();
+        leaveCallAction();
     };
 
     return (
@@ -135,7 +136,8 @@ const ContextProvider = ({ children }) => {
             leaveCall,
             answerCall,
             initiateWebcamAndMicrophone,
-            onlineUsers
+            onlineUsers,
+            userStream
         }}>
             { children}
         </SocketContext.Provider>
