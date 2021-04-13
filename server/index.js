@@ -1,5 +1,7 @@
 const app = require('express')();
 const cors = require('cors');
+const helmet = require('helmet');
+const compression = require('compression');
 
 const USERS = require('./users');
 
@@ -12,6 +14,8 @@ const IO = require('socket.io')(server, {
 });
 
 app.use(cors());
+app.use(helmet());
+app.use(compression()); //Compress all routes
 
 IO.on('connection', (socket) => {
     // When user joins from front end side
