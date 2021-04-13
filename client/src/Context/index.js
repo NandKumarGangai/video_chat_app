@@ -4,8 +4,8 @@ import Peer from 'simple-peer';
 
 export const SocketContext = createContext();
 
-const socket = io('http://localhost:5000');
-// const socket = io('https://video-chat-app-ng.herokuapp.com/');
+// const socket = io('http://localhost:5000');
+const socket = io('https://video-chat-app-ng.herokuapp.com/');
 
 const ContextProvider = ({ children }) => {
     const [stream, setStream] = useState(null);
@@ -27,7 +27,7 @@ const ContextProvider = ({ children }) => {
         if (connectionRef.current) {
             connectionRef.current.destroy();
         }
-        window.location.reload();
+        window.location.assign('/');
     };
 
     const initiateWebcamAndMicrophone = () => {
