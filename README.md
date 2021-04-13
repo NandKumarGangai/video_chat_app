@@ -1,6 +1,10 @@
 # video_chat_app
 
-TODO
-1. Hang up is breaking on Netlify. pls fixx.
+Person to person safe and secure video call app.
+Technologies used.
+For front end: React JS, Peerjs and socketIO-client
+For back end: Node JS, Express JS and SocketIO.
 
-// https://codepen.io/vhanla/pen/PxjZvj
+Backend is deployed on heroku server and front end bundle is deployed on Netlify.
+
+Live: https://ng-video-room.netlify.app/
